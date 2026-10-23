@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>로도스 오퍼레이터 퀴즈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Gothic+A1:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="head-top">
+      <span class="eyebrow">Rhodes Island · Personnel Archive</span>
+      <div class="langs" id="langs" role="group" aria-label="Language"></div>
+    </div>
+    <h1 id="title"></h1>
+    <span class="sub" data-t="sub"></span>
+  </header>
+
+  <nav class="modes" id="modes"></nav>
+
+  <div class="bar">
+    <input id="guess" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="stats">
+      <div><b id="timer">00:00</b></div>
+      <div><span data-t="got"></span> <b id="got">0</b></div>
+      <div><span data-t="left"></span> <b id="left">0</b></div>
+    </div>
+    <div class="btns">
+      <button id="shadowBtn" aria-pressed="false"></button>
+      <button id="sndBtn" aria-pressed="true" class="on" data-t="sound"></button>
+      <button id="giveBtn" data-t="giveUp"></button>
+      <button id="resetBtn" data-t="reset"></button>
+    </div>
+    <div class="diff" role="group">
+      <button id="normalBtn" aria-pressed="true" class="on" data-t="normal"></button>
+      <button id="hardBtn" aria-pressed="false" data-t="hard"></button>
+    </div>
+    <div class="classes" id="classes"></div>
+  </div>
+
+  <div id="board" class="grid"></div>
+  <p class="legal" data-t="legal"></p>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="card" role="dialog" aria-labelledby="mTitle">
+    <span class="eyebrow" id="mEye">CLEAR</span>
+    <div class="t" id="mTime">00:00</div>
+    <h3 id="mTitle"></h3>
+    <span class="sub" id="mSub"></span>
+    <div class="btns" style="justify-content:center">
+      <button id="closeBtn" data-t="close"></button>
+      <button id="againBtn" class="on" data-t="again"></button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="names.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

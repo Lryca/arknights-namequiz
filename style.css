@@ -1,0 +1,88 @@
+/* Layout: 터미널 헤더 + 고정 입력 바 + 초상화 한 장짜리 그리드 (단일 다크 테마) */
+:root{
+  --bg:#14171c; --panel:#1c2027; --tile:#232832; --line:#2d333d; --fg:#e7e9ec; --dim:#8a919c;
+  --accent:#f2c230; --hit:#3fc6d6; --miss:#e0564f;
+  --r6:#f08a3c; --r5:#f2c230; --r4:#b7a3e6; --r3:#5fb3e8; --r2:#9ccf6a; --r1:#8a919c;
+  --display:"Chakra Petch","Gothic A1",system-ui,sans-serif;
+  --body:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --barh:120px;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--fg);margin:0}
+body{font-family:var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:6px;border-left:4px solid var(--accent);padding-left:14px}
+.eyebrow{font-family:var(--display);font-size:12px;letter-spacing:.2em;color:var(--accent);text-transform:uppercase}
+.head-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.langs{display:flex}
+.langs button{padding:5px 10px;font-size:12px}
+.langs button+button{border-left:none}
+/* 일본어·중국어 글자는 Gothic A1에 없어서 각 운영체제 기본 글꼴로 */
+:lang(ja){--body:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif}
+:lang(zh){--body:"PingFang SC","Microsoft YaHei","Noto Sans SC","Source Han Sans SC",system-ui,sans-serif}
+:lang(ja),:lang(zh){--display:"Chakra Petch",var(--body)}
+.classes i{font-style:normal}
+h1{margin:0;font-size:clamp(22px,4vw,34px);font-weight:800;text-wrap:balance}
+.sub{color:var(--dim);font-size:13px;line-height:1.5}
+h1 em{font-style:normal;color:var(--accent)}
+.modes{display:flex;flex-direction:column;gap:6px}
+.mode-row{display:flex;flex-wrap:wrap;gap:6px}
+.modes button{display:flex;gap:6px;align-items:baseline}
+.modes button small{font-weight:400;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.modes button.on small{color:#14171c;opacity:.7}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border:1px solid var(--line);padding:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#guess{flex:1 1 220px;min-width:0;font:600 17px var(--body);background:var(--bg);color:var(--fg);border:1px solid var(--line);padding:10px 12px;outline:none}
+#guess:focus{border-color:var(--accent)}
+#guess.flash{border-color:var(--hit)}
+.stats{display:flex;gap:14px;font-family:var(--display);font-variant-numeric:tabular-nums;font-size:15px}
+.stats b{color:var(--accent);font-weight:700}
+.stats span{color:var(--dim)}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+button{font:600 13px var(--body);background:transparent;color:var(--fg);border:1px solid var(--line);padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--fg)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.on{background:var(--accent);color:#14171c;border-color:var(--accent)}
+.diff{display:flex;margin-left:auto}
+.diff button+button{border-left:none}
+.diff #hardBtn.on{background:var(--miss);border-color:var(--miss);color:#fff}
+.classes{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.classes b{color:var(--fg);font-weight:600}
+.classes .done b{color:var(--hit)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px}
+.divider{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;padding:14px 0 4px;border-bottom:1px solid var(--line);font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.08em}
+.tile,.divider{scroll-margin-top:calc(var(--barh) + 16px)}
+.divider:first-child{padding-top:0}
+.divider small{font-family:var(--body);font-weight:400;font-size:12px;color:var(--dim);letter-spacing:0}
+.divider small b{color:var(--fg);font-weight:600}
+.divider.done small b{color:var(--hit)}
+.tile{position:relative;background:var(--tile);border:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.tile::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--rc)}
+/* 하드 모드: 맞히기 전까지 성급 색 띠를 숨겨요 */
+.hard .tile:not(.got):not(.lost)::after{display:none}
+.tile[data-r="6"]{--rc:var(--r6)}.tile[data-r="5"]{--rc:var(--r5)}.tile[data-r="4"]{--rc:var(--r4)}
+.tile[data-r="3"]{--rc:var(--r3)}.tile[data-r="2"]{--rc:var(--r2)}.tile[data-r="1"]{--rc:var(--r1)}
+.pic{position:relative;aspect-ratio:1;max-width:100%;display:grid;place-items:center}
+.pic img{width:100%;height:100%;object-fit:cover;display:block;visibility:hidden}
+.nm{font-size:11px;font-weight:600;line-height:1.25;padding:4px 4px 5px;min-height:2.5em;text-align:center;overflow-wrap:anywhere;color:transparent;border-top:1px solid var(--line)}
+
+.shadow .tile:not(.got):not(.lost) .pic img{visibility:visible;filter:brightness(0);opacity:.85}
+.tile.got{border-color:var(--hit)}
+.tile.got .pic img,.tile.lost .pic img{visibility:visible;filter:none}
+.tile.got .nm{color:var(--fg)}
+.tile.lost{border-color:var(--miss)}
+.tile.lost .pic img{filter:grayscale(1);opacity:.55}
+.tile.lost .nm{color:var(--miss)}
+.tile.noimg .pic img{display:none}
+.tile.new{animation:pop .6s ease-out}
+@keyframes pop{from{background:var(--hit);transform:scale(1.06)}}
+@media (prefers-reduced-motion:reduce){.tile.new{animation:none}}
+
+.legal{font-size:11px;color:var(--dim)}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.7);display:grid;place-items:center;padding:20px}
+.card{background:var(--panel);border:1px solid var(--accent);padding:26px;max-width:360px;width:100%;display:flex;flex-direction:column;gap:12px;text-align:center}
+.card .t{font-family:var(--display);font-size:40px;color:var(--accent);font-variant-numeric:tabular-nums}
+.card h3{margin:0;font-size:20px}
