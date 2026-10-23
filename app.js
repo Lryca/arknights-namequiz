@@ -14,7 +14,7 @@ const eulReul = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >
 const T = {
   ko: {
     pageTitle: "로도스 오퍼레이터 퀴즈",
-    title: w => `본인은 명일방주의 모든 <em>${w}</em>${eulReul(w)} 알고 있다`,
+    title: w => `당신은 명일방주의 모든 <em>${w}</em>${eulReul(w)} 알고 있다`,
     operator: "오퍼레이터",
     sub: "이름을 입력하면 자동으로 채점돼요. 한국어, 영어 둘 다 되고 띄어쓰기는 상관없어요. 첫 입력부터 타이머가 돌아요.",
     placeholder: "오퍼레이터 이름 입력", got: "맞춤", left: "남음",
@@ -27,7 +27,7 @@ const T = {
   },
   ja: {
     pageTitle: "ロドス・オペレータークイズ",
-    title: w => `私はアークナイツの<em>${w}</em>を全員知っている`,
+    title: w => `あなたはアークナイツの<em>${w}</em>を全員知っている`,
     operator: "オペレーター",
     sub: "名前を入力すると自動で採点されます。日本語・英語どちらでもOK、ひらがなでも入力できます。最初の入力からタイマーが動きます。",
     placeholder: "オペレーター名を入力", got: "正解", left: "残り",
@@ -40,7 +40,7 @@ const T = {
   },
   en: {
     pageTitle: "Rhodes Operator Quiz",
-    title: w => `I know every <em>${w}</em> in Arknights`,
+    title: w => `You know every <em>${w}</em> in Arknights`,
     operator: "Operator",
     sub: "Type a name and it is checked automatically. Spaces and capitals don't matter. The timer starts with your first keystroke.",
     placeholder: "Type an operator name", got: "Found", left: "Left",
@@ -53,7 +53,7 @@ const T = {
   },
   zh: {
     pageTitle: "罗德岛干员测验",
-    title: w => `我认识明日方舟的所有<em>${w}</em>`,
+    title: w => `你认识明日方舟的所有<em>${w}</em>`,
     operator: "干员",
     sub: "输入名字即可自动判定。中文、英文都可以，空格不影响。第一次输入时开始计时。",
     placeholder: "输入干员名字", got: "答对", left: "剩余",
