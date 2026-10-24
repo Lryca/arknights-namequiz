@@ -23,6 +23,7 @@ const T = {
     winAll: "당신은 진정한 로도스 아일랜드 독타", winOne: m => `당신은 ${m} 인사 담당관`, lose: "켈시가 한숨을 쉽니다",
     score: (n, f, p) => `${n}명 중 ${f}명 (${p}%)`,
     close: "닫기", again: "다시 하기",
+    confirmTitle: "진행 중인 게임이 있어요", confirmBody: n => `지금까지 ${n}명 맞혔어요. 바꾸면 기록이 사라지고 새 게임이 시작돼요.`, keep: "계속 플레이", proceed: "바꾸기",
     legal: "※ 비공식 팬 콘텐츠이며 Hypergryph · Yostar의 승인을 받지 않았습니다. 캐릭터 이미지의 저작권은 Hypergryph에 있습니다.",
   },
   ja: {
@@ -36,6 +37,7 @@ const T = {
     winAll: "あなたこそ真のロドス・アイランドのドクター", winOne: m => `あなたは${m}人事担当`, lose: "ケルシーがため息をついた",
     score: (n, f, p) => `${n}人中${f}人 (${p}%)`,
     close: "閉じる", again: "もう一度",
+    confirmTitle: "プレイ中のゲームがあります", confirmBody: n => `ここまで${n}人正解しています。切り替えると記録が消えて、新しいゲームが始まります。`, keep: "続ける", proceed: "切り替える",
     legal: "※ 非公式のファンコンテンツです。Hypergryph・Yostarの承認を受けたものではありません。キャラクター画像の著作権はHypergryphに帰属します。",
   },
   en: {
@@ -49,6 +51,7 @@ const T = {
     winAll: "You are a true Doctor of Rhodes Island", winOne: m => `You are the ${m} personnel officer`, lose: "Kal'tsit sighs",
     score: (n, f, p) => `${f} of ${n} (${p}%)`,
     close: "Close", again: "Play again",
+    confirmTitle: "A game is in progress", confirmBody: n => `You've found ${n} so far. Switching clears your progress and starts a new game.`, keep: "Keep playing", proceed: "Switch",
     legal: "※ Unofficial fan content, not approved by Hypergryph or Yostar. Character images © Hypergryph.",
   },
   zh: {
@@ -62,6 +65,7 @@ const T = {
     winAll: "你是真正的罗德岛博士", winOne: m => `你是${m}人事专员`, lose: "凯尔希叹了口气",
     score: (n, f, p) => `共${n}人，答对${f}人 (${p}%)`,
     close: "关闭", again: "再来一次",
+    confirmTitle: "游戏正在进行中", confirmBody: n => `目前已答对${n}人。切换后记录将清空，并开始新游戏。`, keep: "继续游戏", proceed: "切换",
     legal: "※ 非官方粉丝作品，未经鹰角网络（Hypergryph）及悠星（Yostar）授权。角色图片版权归鹰角网络所有。",
   },
 };
@@ -126,7 +130,7 @@ function applyText(){
     const b = document.createElement("button");
     b.textContent = label; b.lang = code;
     b.classList.toggle("on", code === lang); b.setAttribute("aria-pressed", code === lang);
-    b.onclick = () => setLang(code);
+    b.onclick = () => { if (code !== lang) guard(() => setLang(code)); };
     langs.append(b);
   }
 }
@@ -149,7 +153,7 @@ function buildModes(){
       b.innerHTML = `<span></span><small>${n}</small>`;
       b.querySelector("span").textContent = m.label();
       b.classList.toggle("on", m === mode); b.setAttribute("aria-pressed", m === mode);
-      b.onclick = () => { mode = m; try { localStorage.setItem("akq-mode", m.id); } catch(e){} buildModes(); build(); setBarH(); input.focus(); };
+      b.onclick = () => { if (m === mode) return; guard(() => { mode = m; try { localStorage.setItem("akq-mode", m.id); } catch(e){} buildModes(); build(); setBarH(); input.focus(); }); };
       line.append(b);
     }
     nav.append(line);
@@ -226,12 +230,8 @@ function beep(){
   } catch(e){}
 }
 
-input.addEventListener("input", () => {
-  if (over) return;
-  const k = norm(input.value); if (!k) return;
-  startTimer();
-  const hit = ops.find(o => !o.done && o.keys.includes(k));
-  if (!hit) return;
+// 정답 처리: 친 이름이 아직 안 맞힌 오퍼레이터 이름과 일치하면 바로 정답이에요.
+function accept(hit){
   hit.done = true; found++;
   hit.img.loading = "eager";
   hit.el.classList.add("got", "new");
@@ -245,7 +245,17 @@ input.addEventListener("input", () => {
   beep();
   hit.el.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   if (found === ops.length) finish(true);
-});
+}
+
+function check(){
+  if (over) return;
+  const k = norm(input.value); if (!k) return;
+  startTimer();
+  const hit = ops.find(o => !o.done && o.keys.includes(k));
+  if (hit) accept(hit);
+}
+
+input.addEventListener("input", check);
 
 function finish(win){
   over = true; clearInterval(tick); input.disabled = true;
@@ -266,10 +276,31 @@ $("shadowBtn").onclick = e => {
 };
 $("sndBtn").onclick = e => { sound = !sound; e.currentTarget.classList.toggle("on", sound); e.currentTarget.setAttribute("aria-pressed", sound); };
 $("giveBtn").onclick = () => { if (!over) finish(false); };
-$("resetBtn").onclick = $("againBtn").onclick = () => { $("modal").hidden = true; build(); input.focus(); };
+$("resetBtn").onclick = () => guard(() => { build(); input.focus(); });
+$("againBtn").onclick = () => { $("modal").hidden = true; build(); input.focus(); };
 $("closeBtn").onclick = () => $("modal").hidden = true;
-$("normalBtn").onclick = () => { if (!hard) return; setDiff(false); build(); input.focus(); };
-$("hardBtn").onclick = () => { if (hard) return; setDiff(true); build(); input.focus(); };
+$("normalBtn").onclick = () => { if (!hard) return; guard(() => { setDiff(false); build(); input.focus(); }); };
+$("hardBtn").onclick = () => { if (hard) return; guard(() => { setDiff(true); build(); input.focus(); }); };
+
+// 플레이 도중(타이머가 돌고 있고 아직 안 끝났을 때) 모드·난이도·언어를 바꾸거나 "다시"를 누르면
+// 정말 바꿀지 먼저 물어봐요. 게임 전이나 끝난 뒤에는 바로 바뀌어요.
+let confirmAction = null;
+function guard(action){
+  if (!started || over) return action();
+  confirmAction = action;
+  $("cBody").textContent = t().confirmBody(found);
+  $("confirm").hidden = false;
+  $("keepBtn").focus();
+}
+function closeConfirm(go){
+  $("confirm").hidden = true;
+  const a = confirmAction; confirmAction = null;
+  if (go && a) a(); else input.focus();
+}
+$("keepBtn").onclick = () => closeConfirm(false);
+$("proceedBtn").onclick = () => closeConfirm(true);
+$("confirm").addEventListener("click", e => { if (e.target === e.currentTarget) closeConfirm(false); });
+addEventListener("keydown", e => { if (e.key === "Escape" && !$("confirm").hidden) closeConfirm(false); });
 
 const setBarH = () => document.documentElement.style.setProperty("--barh", document.querySelector(".bar").offsetHeight + "px");
 addEventListener("resize", setBarH);
