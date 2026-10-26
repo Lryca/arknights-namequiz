@@ -203,7 +203,7 @@ function build(){
       const img = el.querySelector("img");
       img.onerror = () => el.classList.add("noimg");
       if (o.id) img.src = IMG_BASE + o.id + ".png"; else el.classList.add("noimg");
-      el.querySelector(".nm").textContent = name;
+      // 이름은 맞히거나 포기하기 전까지 넣지 않아요 (드래그·복사로 정답이 보이지 않게)
       frag.append(el);
       const answers = lang === "ko" ? [o.name, o.en, ...(ALIASES[o.name] || [])] : [name, o.en];
       ops.push({ name, keys: [...new Set(answers.filter(Boolean).map(norm))], el, img, done: false, group: g });
@@ -231,9 +231,10 @@ function beep(){
 }
 
 // 정답 처리: 친 이름이 아직 안 맞힌 오퍼레이터 이름과 일치하면 바로 정답이에요.
-function accept(hit){
+function accept(hit, composing){
   hit.done = true; found++;
   hit.img.loading = "eager";
+  hit.el.querySelector(".nm").textContent = hit.name;
   hit.el.classList.add("got", "new");
   const g = hit.group; g.got++;
   for (const el of g.els){
@@ -241,26 +242,34 @@ function accept(hit){
     if (g.got === g.total) el.classList.add("done");
   }
   $("got").textContent = found; $("left").textContent = ops.length - found;
-  input.value = ""; input.classList.add("flash"); setTimeout(() => input.classList.remove("flash"), 200);
+  // 한글 입력기가 글자를 조합하는 도중에 입력창을 비우면, 윈도우 등에서 조합 중이던 글자가
+  // 다시 들어와 "래티넘"처럼 남는 문제가 있어요. 조합 중이면 포커스를 잠깐 빼서 입력기가
+  // 조합을 끝내게 한 다음 비우고, 다시 포커스를 줘요.
+  if (composing){ input.blur(); input.value = ""; input.focus(); }
+  else input.value = "";
+  input.classList.add("flash"); setTimeout(() => input.classList.remove("flash"), 200);
   beep();
   hit.el.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   if (found === ops.length) finish(true);
 }
 
-function check(){
+function check(e){
   if (over) return;
   const k = norm(input.value); if (!k) return;
   startTimer();
   const hit = ops.find(o => !o.done && o.keys.includes(k));
-  if (hit) accept(hit);
+  if (hit) accept(hit, composing || (e && e.isComposing));
 }
 
+let composing = false;
+input.addEventListener("compositionstart", () => composing = true);
+input.addEventListener("compositionend", () => composing = false);
 input.addEventListener("input", check);
 
 function finish(win){
   over = true; clearInterval(tick); input.disabled = true;
   const time = started ? fmt(Date.now() - started) : "00:00";
-  if (!win) ops.filter(o => !o.done).forEach(o => o.el.classList.add("lost"));
+  if (!win) ops.filter(o => !o.done).forEach(o => { o.el.querySelector(".nm").textContent = o.name; o.el.classList.add("lost"); });
   $("mEye").textContent = `${mode.label()} · ${hard ? t().hard : t().normal} · ${win ? "CLEAR" : "MISSION FAILED"}`;
   $("mTime").textContent = time;
   $("mTitle").textContent = !win ? t().lose : mode.all ? t().winAll : t().winOne(mode.label());
