@@ -19,7 +19,7 @@ const T = {
     sub: "이름을 입력하면 자동으로 채점돼요. 한국어, 영어 둘 다 되고 띄어쓰기는 상관없어요. 첫 입력부터 타이머가 돌아요.",
     placeholder: "오퍼레이터 이름 입력", got: "맞춤", left: "남음",
     shadow: "그림자 모드", sound: "소리", giveUp: "포기", reset: "다시", normal: "노말", hard: "하드",
-    allClass: "직군 전체", allRace: "종족 전체", modesLabel: "퀴즈 범위", diffLabel: "난이도",
+    allClass: "직군 전체", allRace: "종족 전체", star: n => `${n}성`, starWord: n => `${n}성 오퍼레이터`, modesLabel: "퀴즈 범위", diffLabel: "난이도",
     winAll: "당신은 진정한 로도스 아일랜드 독타", winOne: m => `당신은 ${m} 인사 담당관`, lose: "켈시가 한숨을 쉽니다",
     score: (n, f, p) => `${n}명 중 ${f}명 (${p}%)`,
     close: "닫기", again: "다시 하기",
@@ -33,7 +33,7 @@ const T = {
     sub: "名前を入力すると自動で採点されます。日本語・英語どちらでもOK、ひらがなでも入力できます。最初の入力からタイマーが動きます。",
     placeholder: "オペレーター名を入力", got: "正解", left: "残り",
     shadow: "シルエット", sound: "効果音", giveUp: "降参", reset: "リセット", normal: "ノーマル", hard: "ハード",
-    allClass: "全職分", allRace: "全種族", modesLabel: "出題範囲", diffLabel: "難易度",
+    allClass: "全職分", allRace: "全種族", star: n => `★${n}`, starWord: n => `★${n}オペレーター`, modesLabel: "出題範囲", diffLabel: "難易度",
     winAll: "あなたこそ真のロドス・アイランドのドクター", winOne: m => `あなたは${m}人事担当`, lose: "ケルシーがため息をついた",
     score: (n, f, p) => `${n}人中${f}人 (${p}%)`,
     close: "閉じる", again: "もう一度",
@@ -47,7 +47,7 @@ const T = {
     sub: "Type a name and it is checked automatically. Spaces and capitals don't matter. The timer starts with your first keystroke.",
     placeholder: "Type an operator name", got: "Found", left: "Left",
     shadow: "Silhouettes", sound: "Sound", giveUp: "Give up", reset: "Restart", normal: "Normal", hard: "Hard",
-    allClass: "All classes", allRace: "All races", modesLabel: "Quiz scope", diffLabel: "Difficulty",
+    allClass: "All classes", allRace: "All races", star: n => `${n}★`, starWord: n => `${n}★ Operator`, modesLabel: "Quiz scope", diffLabel: "Difficulty",
     winAll: "You are a true Doctor of Rhodes Island", winOne: m => `You are the ${m} personnel officer`, lose: "Kal'tsit sighs",
     score: (n, f, p) => `${f} of ${n} (${p}%)`,
     close: "Close", again: "Play again",
@@ -61,7 +61,7 @@ const T = {
     sub: "输入名字即可自动判定。中文、英文都可以，空格不影响。第一次输入时开始计时。",
     placeholder: "输入干员名字", got: "答对", left: "剩余",
     shadow: "剪影模式", sound: "音效", giveUp: "放弃", reset: "重来", normal: "普通", hard: "困难",
-    allClass: "全部职业", allRace: "全部种族", modesLabel: "测验范围", diffLabel: "难度",
+    allClass: "全部职业", allRace: "全部种族", star: n => `${n}星`, starWord: n => `${n}星干员`, modesLabel: "测验范围", diffLabel: "难度",
     winAll: "你是真正的罗德岛博士", winOne: m => `你是${m}人事专员`, lose: "凯尔希叹了口气",
     score: (n, f, p) => `共${n}人，答对${f}人 (${p}%)`,
     close: "关闭", again: "再来一次",
@@ -100,6 +100,8 @@ const MODES = [
   { row: "class", id: "class:all", all: true, groupBy: "cls", order: Object.keys(DATA), label: () => t().allClass },
   ...Object.keys(DATA).map(c => ({ row: "class", id: "class:" + c, groupBy: "cls", order: [c], filter: o => o.cls === c, label: () => classOf(c) })),
   { row: "race", id: "race:all", all: true, groupBy: "race", order: RACE_ORDER, label: () => t().allRace },
+  // 성급 모드: 그 성급만, 직군별로 나눠서
+  ...[6, 5, 4].map(n => ({ row: "rarity", id: "rarity:" + n, groupBy: "cls", order: Object.keys(DATA), filter: o => o.r === n, label: () => t().star(n), word: () => t().starWord(n) })),
 ];
 let mode = MODES[0];
 try { const m = MODES.find(x => x.id === localStorage.getItem("akq-mode")); if (m) mode = m; } catch(e){}
@@ -145,7 +147,7 @@ function setLang(code){
 
 function buildModes(){
   const nav = $("modes"); nav.innerHTML = "";
-  for (const row of ["class", "race"]){
+  for (const row of ["class", "race", "rarity"]){
     const line = document.createElement("div"); line.className = "mode-row";
     for (const m of MODES.filter(x => x.row === row)){
       const n = m.filter ? ALL_OPS.filter(m.filter).length : ALL_OPS.length;
@@ -164,7 +166,7 @@ function build(){
   board.innerHTML = ""; $("classes").innerHTML = "";
   ops = []; groups = []; found = 0; over = false; started = 0;
   clearInterval(tick); $("timer").textContent = "00:00";
-  $("title").innerHTML = t().title(mode.all ? t().operator : mode.label());
+  $("title").innerHTML = t().title(mode.all ? t().operator : mode.word ? mode.word() : mode.label());
   $("classes").hidden = mode.id !== "class:all";
   board.classList.toggle("hard", hard);
 
